@@ -1,10 +1,12 @@
 import pygame
 import random
+import bullets
+
 """ Object class """
 
 
-class Object(pygame.sprite.Sprite):
-    def __init__(self, health, score, texture, startingPos, scale):
+class Movables(pygame.sprite.Sprite):
+    def __init__(self, health, texture, startingPos, bulletTexture, scale):
         pygame.sprite.Sprite.__init__(self)
         self.scale = scale
         self.startingPos = startingPos
@@ -13,8 +15,7 @@ class Object(pygame.sprite.Sprite):
         if self.scale == 0:
             self.sImage = pygame.image.load(texture).convert()
             scl = (self.sImage.get_width(), self.sImage.get_height())
-            self.scale = scl
-            self.image = pygame.transform.scale(self.sImage, self.scale)
+            self.image = pygame.transform.scale(self.sImage, scl)
         else:
             self.sImage = pygame.image.load(texture).convert()
             self.image = pygame.transform.scale(self.sImage, self.scale)
@@ -25,9 +26,14 @@ class Object(pygame.sprite.Sprite):
         self.rect.centerx = startingPos[0]
         self.rect.centery = startingPos[1]
         self.health = health
-        self.score = score
         self.speedX = 0
         self.speedY = 0
+        self.cooldownTimer = 0
+
+        # setup bullet
+        self.bulletGroup = pygame.sprite.Group()
+        self.objectGroup = pygame.sprite.Group()
+        self.bulletTexture = bulletTexture
         # self.bullet = bullet, bullet
 
     def move(self):
@@ -36,16 +42,41 @@ class Object(pygame.sprite.Sprite):
     def collision(self):
         pass
 
+    def screenWrap(self):
+        if self.rect.right <= 0:
+            self.rect.left = 649
+        if self.rect.left >= 650:
+            self.rect.right = 1
+        if self.rect.bottom <= 0:
+            self.rect.top = 979
+        if self.rect.top >= 980:
+            self.rect.bottom = 1
+
     def destroy(self):
         self.kill()
 
+    def cooldown(self):
+        if self.cooldownTimer >= 10:
+            self.cooldownTimer = 0
+        elif self.cooldownTimer > 0:
+            self.cooldownTimer += 1
+
+    def shoot(self):
+        bullet = bullets.Bullet(self.bulletTexture, (self.rect.centerx, self.rect.top - 45))
+        self.bulletGroup.add(bullet)
+        self.objectGroup.add(bullet)
+
     def update(self):
-        pass
+        self.screenWrap()
+        self.move()
+        self.bulletGroup.update()
+        self.objectGroup.update()
 
 
-class Player(Object):
+class Player(Movables):
     # move
     def move(self):
+        self.cooldown()
         # reset speed
         self.speedX = 0
         self.speedY = 0
@@ -59,57 +90,16 @@ class Player(Object):
             self.speedX -= 6
         if event[pygame.K_d]:
             self.speedX += 6
+        if event[pygame.K_SPACE] and self.cooldownTimer == 0:
+            self.cooldownTimer = 1
+            self.shoot()
 
         # update the position of the player
         self.rect.x += self.speedX
         self.rect.y += self.speedY
 
-    def screenWrap(self):
-        if self.rect.right <= 0:
-            self.rect.left = 649
-        if self.rect.left >= 650:
-            self.rect.right = 1
-        if self.rect.bottom <= 0:
-            self.rect.top = 979
-        if self.rect.top >= 980:
-            self.rect.bottom = 1
 
-    # update
-    def update(self):
-        self.move()
-        self.screenWrap()
-
-
-class Background(Object):
-    def move(self):
-        self.speedX = 0
-        self.speedY = 0
-        if True:
-            self.speedY += 5
-        self.rect.y += self.speedY
-        if self.rect.y >= 980:
-            self.rect.y = -800
-
-    def update(self):
-        self.move()
-
-
-class Bullet(Object):
-    def destroy(self):
-        if self.rect.bottom <= 0 or self.rect.top >= 980:
-            self.kill()
-
-    def move(self):
-        if True:
-            self.speedY -= 4.5
-        self.rect.y += self.speedY
-        self.destroy()
-
-    def update(self):
-        self.move()
-
-
-class Meteor(Object):
+class Meteor(Movables):
     def destroy(self):
         if self.rect.top >= 980:
             self.kill()
@@ -117,7 +107,3 @@ class Meteor(Object):
     def move(self):
         self.rect.x += self.startingPos[2]
         self.rect.y += self.startingPos[3]
-        self.destroy()
-
-    def update(self):
-        self.move()

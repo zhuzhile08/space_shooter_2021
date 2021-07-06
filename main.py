@@ -3,8 +3,9 @@ import pygame
 import sys
 import os
 import random
-import data.scripts.object as obj
-import data.scripts.stage as stage
+import object as obj
+import background as bj
+import stage
 from pygame.locals import*
 
 
@@ -14,36 +15,26 @@ pygame.mixer.init()
 pygame.font.init()
 pygame.display.set_caption('Game')
 clock = pygame.time.Clock()
-
 window = pygame.display.set_mode((650, 980), 0, 32)
 
 score = 0
 
 # define some folders
-assetsFolder = os.path.join('data', 'Assets')
-imgFolder = os.path.join(assetsFolder, 'img')
+imgFolder = os.path.join('data', 'img')
 bgFolder = os.path.join(imgFolder, 'bg')
 laserFolder = os.path.join(imgFolder, 'Lasers')
 enemyFolder = os.path.join(imgFolder, 'Enemies')
+kenFont = pygame.font.Font(os.path.join('data', 'kenvector_future_thin.ttf'), 30)     # font
 
-
-# create the Groups and Sprites
-objects = pygame.sprite.Group()
-mobs = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-
-kenFont = pygame.font.Font(os.path.join(assetsFolder, 'kenvector_future_thin.ttf'), 30)     # font
-player = obj.Player(3, score, os.path.join(imgFolder, 'playerShip1_blue.png'), (325, 890), 0)       # player
-bg1 = obj.Background(0, score, os.path.join(bgFolder, 'black.png'), (325, 0), (650, 650))      # backgrounds
-bg2 = obj.Background(0, score, os.path.join(bgFolder, 'black.png'), (325, 650), (650, 650))
-bg3 = obj.Background(0, score, os.path.join(bgFolder, 'black.png'), (325, 1300), (650, 650))
-
-objects.add(bg1, bg2, bg3, player)      # add sprites to normal objects group
-
+# textures and objects
+playerBulletTexture = os.path.join(laserFolder, 'laserBlue16.png')
+bgTexture = os.path.join(bgFolder, 'blue.png')
+player = obj.Player(3, os.path.join(imgFolder, 'playerShip1_blue.png'), (325, 900), playerBulletTexture, 0)
+meteor = obj.Meteor(1, os.path.join(enemyFolder, 'meteorBrown_big1.png'), (random.randrange(0, 650), 0, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0)
+meteor2 = obj.Meteor(1, os.path.join(enemyFolder, 'meteorGrey_big1.png'), (random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0)
 
 # crate stages
-# stage1 = stage.Stage()
-
+stage1 = stage.Stage(player, 0, (meteor, meteor2), 'Stage 1', kenFont, bgTexture, score)
 
 # main game loop
 running = True
@@ -54,25 +45,12 @@ while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
-        if event.type == KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                # spawn bullets
-                playerBullet = obj.Bullet(0, score, os.path.join(laserFolder, 'laserBlue01.png'), (player.rect.centerx, player.rect.top + 3), 0)
-                objects.add(playerBullet)
-                bullets.add(playerBullet)
-
-                meteor = obj.Meteor(1, score, os.path.join(enemyFolder, 'meteorBrown_big1.png'),(random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0)
-                objects.add(meteor)
-                mobs.add(meteor)
-
-    enemyShot = pygame.sprite.groupcollide(mobs, bullets, True, True)
-    if enemyShot:
-        score += 1
 
     # update and draw stuff on the screen
     window.fill((0, 0, 0))
-    objects.draw(window)
-    objects.update()
+
+    # draw stage
+    stage1.update(window)
 
     # score
     scoreFont = kenFont.render('Score: ' + str(score), True, (255, 255, 255))
