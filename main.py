@@ -2,6 +2,7 @@
 import pygame
 import sys
 import os
+import settings
 import random
 import object as obj
 import background as bj
@@ -12,29 +13,26 @@ from pygame.locals import*
 # initialize pygame, setup window
 pygame.init()
 pygame.mixer.init()
-pygame.font.init()
 pygame.display.set_caption('Game')
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((650, 980), 0, 32)
 
 score = 0
 
-# define some folders
-imgFolder = os.path.join('data', 'img')
-bgFolder = os.path.join(imgFolder, 'bg')
-laserFolder = os.path.join(imgFolder, 'Lasers')
-enemyFolder = os.path.join(imgFolder, 'Enemies')
-kenFont = pygame.font.Font(os.path.join('data', 'kenvector_future_thin.ttf'), 30)     # font
-
 # textures and objects
-playerBulletTexture = os.path.join(laserFolder, 'laserBlue16.png')
-bgTexture = os.path.join(bgFolder, 'blue.png')
-player = obj.Player(3, os.path.join(imgFolder, 'playerShip1_blue.png'), (325, 900), playerBulletTexture, 0)
-meteor = obj.Meteor(1, os.path.join(enemyFolder, 'meteorBrown_big1.png'), (random.randrange(0, 650), 0, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0)
-meteor2 = obj.Meteor(1, os.path.join(enemyFolder, 'meteorGrey_big1.png'), (random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0)
+playerBulletTexture = os.path.join(settings.laserFolder, 'laserBlue16.png')
+bgTexture = os.path.join(settings.bgFolder, 'black.png')
+player = obj.Player(3, os.path.join(settings.imgFolder, 'playerShip1_blue.png'), (325, 900), playerBulletTexture, 0)
+
+
+# enemy dictionaries for each stage
+stg1EnemyDic = (obj.Meteor(1, os.path.join(settings.enemyFolder, 'meteorBrown1.png'), (random.randrange(0, 650), 0, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0),
+                obj.Meteor(1, os.path.join(settings.enemyFolder, 'meteorBrown2.png'), (random.randrange(0, 650), 0, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0),
+                obj.Meteor(1, os.path.join(settings.enemyFolder, 'meteorGrey1.png'), (random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0),
+                obj.Meteor(1, os.path.join(settings.enemyFolder, 'ufoGrey.png'), (random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0))
 
 # crate stages
-stage1 = stage.Stage(player, 0, (meteor, meteor2), 'Stage 1', kenFont, bgTexture, score)
+stage1 = stage.Stage(player, 0, 'Stage 1', bgTexture, score, stg1EnemyDic)
 
 # main game loop
 running = True
@@ -51,10 +49,6 @@ while running:
 
     # draw stage
     stage1.update(window)
-
-    # score
-    scoreFont = kenFont.render('Score: ' + str(score), True, (255, 255, 255))
-    window.blit(scoreFont, (10, 5))
 
     pygame.display.update()
     pygame.display.flip()

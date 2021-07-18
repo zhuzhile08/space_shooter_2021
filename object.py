@@ -2,7 +2,18 @@ import pygame
 import random
 import bullets
 
-""" Object class """
+
+class HealthBar(pygame.sprite.Sprite):
+    def __init__(self, health, currentHealth, texture, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.health = health
+        self.currentHealth = currentHealth
+        self.position = position
+        self.sImage = pygame.image.load(texture).convert()
+
+    def update(self):
+        scale = (self.currentHealth / self.health, self.sImage.get_height())
+        self.image = pygame.transform.scale(self.sImage, scale)
 
 
 class Movables(pygame.sprite.Sprite):
@@ -20,7 +31,7 @@ class Movables(pygame.sprite.Sprite):
             self.sImage = pygame.image.load(texture).convert()
             self.image = pygame.transform.scale(self.sImage, self.scale)
 
-        # rest of the setup
+        # setup image
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
         self.rect.centerx = startingPos[0]
@@ -29,6 +40,7 @@ class Movables(pygame.sprite.Sprite):
         self.speedX = 0
         self.speedY = 0
         self.cooldownTimer = 0
+        self.currentHealth = self.health
 
         # setup bullet
         self.bulletGroup = pygame.sprite.Group()
@@ -40,20 +52,7 @@ class Movables(pygame.sprite.Sprite):
         pass
 
     def collision(self):
-        pass
-
-    def screenWrap(self):
-        if self.rect.right <= 0:
-            self.rect.left = 649
-        if self.rect.left >= 650:
-            self.rect.right = 1
-        if self.rect.bottom <= 0:
-            self.rect.top = 979
-        if self.rect.top >= 980:
-            self.rect.bottom = 1
-
-    def destroy(self):
-        self.kill()
+        self.currentHealth -= 1
 
     def cooldown(self):
         if self.cooldownTimer >= 10:
@@ -62,15 +61,14 @@ class Movables(pygame.sprite.Sprite):
             self.cooldownTimer += 1
 
     def shoot(self):
-        bullet = bullets.Bullet(self.bulletTexture, (self.rect.centerx, self.rect.top - 45))
+        bullet = bullets.Bullet(self.bulletTexture, (self.rect.centerx, self.rect.top - 45), 40)
         self.bulletGroup.add(bullet)
         self.objectGroup.add(bullet)
 
     def update(self):
-        self.screenWrap()
         self.move()
-        self.bulletGroup.update()
-        self.objectGroup.update()
+        if self.currentHealth <= 1:
+            self.kill()
 
 
 class Player(Movables):
@@ -81,6 +79,7 @@ class Player(Movables):
         self.speedX = 0
         self.speedY = 0
 
+        # detect input
         event = pygame.key.get_pressed()
         if event[pygame.K_w]:
             self.speedY -= 6
@@ -98,10 +97,24 @@ class Player(Movables):
         self.rect.x += self.speedX
         self.rect.y += self.speedY
 
+    def screenWrap(self):
+        if self.rect.right <= 0:
+            self.rect.left = 649
+        if self.rect.left >= 650:
+            self.rect.right = 1
+        if self.rect.bottom <= 0:
+            self.rect.top = 979
+        if self.rect.top >= 980:
+            self.rect.bottom = 1
+
+    def update(self):
+        self.screenWrap()
+        self.move()
+
 
 class Meteor(Movables):
     def destroy(self):
-        if self.rect.top >= 980:
+        if self.rect.top >= 980 or self.health <= 0:
             self.kill()
 
     def move(self):

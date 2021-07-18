@@ -1,24 +1,21 @@
 import pygame
 import random
-import threading
-import object
+import settings
 import background
-from pygame.locals import *
 
 
 class Stage:
-    def __init__(self, player, boss, enemies, name, font, bgTexture, score):
-        # setting up the groups
+    def __init__(self, player, boss, name, bgTexture, score, enemyDic):
+        # setting up the sprite groups and textures
         self.objectGroup = pygame.sprite.Group()
         self.enemyGroup = pygame.sprite.Group()
         self.bulletGroup = pygame.sprite.Group()
         self.bgTexture = bgTexture
         self.player = player
         self.boss = boss
-        self.enemies = enemies
         self.name = name
-        self.font = font
         self.score = score
+        self.enemyDic = enemyDic
 
         # set up backgrounds
         self.bg1 = background.Background(bgTexture, (650, 650), 0)
@@ -26,13 +23,8 @@ class Stage:
         self.bg3 = background.Background(bgTexture, (650, 650), 2)
         self.objectGroup.add(self.bg1, self.bg2, self.bg3, self.player)
 
-    def spawnEnemies(self):
-        enemy = random.choice(self.enemies)
-        self.objectGroup.add(enemy)
-        self.enemyGroup.add(enemy)
-
     def collisions(self):
-        bulletEnemyCollide = pygame.sprite.groupcollide(self.enemyGroup, self.player.bulletGroup, True, True)
+        bulletEnemyCollide = pygame.sprite.groupcollide(self.player.bulletGroup, self.enemyGroup, True, True)
         if bulletEnemyCollide:
             self.score += 50
 
@@ -46,8 +38,18 @@ class Stage:
         pass
 
     def update(self, window):
-        self.collisions()
-        self.spawnEnemies()
         self.objectGroup.add(self.player.objectGroup)
+        for i in range(len(self.enemyDic)):
+            enemy = self.enemyDic[i]
+            self.objectGroup.add(enemy)
+        self.collisions()
         self.objectGroup.update()
         self.objectGroup.draw(window)
+
+        # initialize and draw text on screen (score, player health, stage name)
+        scoreFont = settings.kenFont.render('Score: ' + str(self.score), True, (255, 255, 255))
+        healthFont = settings.kenFont.render('health: ' + str(self.player.health), True, (255, 255, 255))
+        stageFont = settings.kenFont.render(self.name, True, (255, 255, 255))
+        window.blit(stageFont, (10, 40))    # draw text
+        window.blit(scoreFont, (10, 5))
+        window.blit(healthFont, (480, 5))
