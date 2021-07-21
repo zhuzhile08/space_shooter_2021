@@ -51,8 +51,8 @@ class Movables(pygame.sprite.Sprite):
     def move(self):
         pass
 
-    def collision(self):
-        self.currentHealth -= 1
+    def collision(self, rect):
+        return self.rect.colliderect(rect)
 
     def cooldown(self):
         if self.cooldownTimer >= 10:
@@ -82,13 +82,13 @@ class Player(Movables):
         # detect input
         event = pygame.key.get_pressed()
         if event[pygame.K_w]:
-            self.speedY -= 6
+            self.speedY -= 8
         if event[pygame.K_s]:
-            self.speedY += 6
+            self.speedY += 8
         if event[pygame.K_a]:
-            self.speedX -= 6
+            self.speedX -= 8
         if event[pygame.K_d]:
-            self.speedX += 6
+            self.speedX += 8
         if event[pygame.K_SPACE] and self.cooldownTimer == 0:
             self.cooldownTimer = 1
             self.shoot()
@@ -113,10 +113,14 @@ class Player(Movables):
 
 
 class Meteor(Movables):
-    def destroy(self):
-        if self.rect.top >= 980 or self.health <= 0:
-            self.kill()
-
     def move(self):
         self.rect.x += self.startingPos[2]
         self.rect.y += self.startingPos[3]
+
+    def update(self):
+        if self.rect.top >= 980:
+            self.kill()
+        if self.rect.bottom <= 0:
+            self.rect.y += 3
+        elif self.rect.bottom >= 1:
+            self.move()

@@ -15,7 +15,7 @@ pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption('Game')
 clock = pygame.time.Clock()
-window = pygame.display.set_mode((650, 980), 0, 32)
+window = pygame.display.set_mode((650, 980))
 
 score = 0
 
@@ -26,10 +26,12 @@ player = obj.Player(3, os.path.join(settings.imgFolder, 'playerShip1_blue.png'),
 
 
 # enemy dictionaries for each stage
-stg1EnemyDic = (obj.Meteor(1, os.path.join(settings.enemyFolder, 'meteorBrown1.png'), (random.randrange(0, 650), 0, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0),
-                obj.Meteor(1, os.path.join(settings.enemyFolder, 'meteorBrown2.png'), (random.randrange(0, 650), 0, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0),
-                obj.Meteor(1, os.path.join(settings.enemyFolder, 'meteorGrey1.png'), (random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0),
-                obj.Meteor(1, os.path.join(settings.enemyFolder, 'ufoGrey.png'), (random.randrange(0, 650), -20, random.randrange(-5, 5), random.randrange(4, 8)), 0, 0))
+stg1EnemyDic = [settings.generateEnemyDictionaryStage1()]
+
+stg2EnemyDic = []
+stg3EnemyDic = []
+stg4EnemyDic = []
+stg5EnemyDic = []
 
 # crate stages
 stage1 = stage.Stage(player, 0, 'Stage 1', bgTexture, score, stg1EnemyDic)
@@ -57,5 +59,3 @@ while running:
 # quit when game loop is exited  
 pygame.quit()
 sys.exit()
-
-# PricklyBerry

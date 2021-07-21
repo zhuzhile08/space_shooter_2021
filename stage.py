@@ -24,9 +24,7 @@ class Stage:
         self.objectGroup.add(self.bg1, self.bg2, self.bg3, self.player)
 
     def collisions(self):
-        bulletEnemyCollide = pygame.sprite.groupcollide(self.player.bulletGroup, self.enemyGroup, True, True)
-        if bulletEnemyCollide:
-            self.score += 50
+        pass
 
     def spawnBoss(self):
         pass
@@ -40,8 +38,7 @@ class Stage:
     def update(self, window):
         self.objectGroup.add(self.player.objectGroup)
         for i in range(len(self.enemyDic)):
-            enemy = self.enemyDic[i]
-            self.objectGroup.add(enemy)
+            self.objectGroup.add(self.enemyDic[i])
         self.collisions()
         self.objectGroup.update()
         self.objectGroup.draw(window)
