@@ -34,8 +34,9 @@ class Stage:
             if pygame.sprite.spritecollideany(enemy, self.player.bulletGroup) is not None:
                 enemy.currentHealth -= 1
                 enemy.collision(self.player.bulletGroup, True)
-            if enemy.currentHealth <= 0 and enemy.rect.top == 1000:
-                self.score += enemy.score
+                if enemy.currentHealth <= 0:
+                    self.score += enemy.score
+                    enemy.removeFromGroup(self.objectGroup)
 
     def spawnBoss(self):
         pass

@@ -67,7 +67,9 @@ class Movables(pygame.sprite.Sprite):
         self.objectGroup.add(bullet)
 
     def removeFromGroup(self, group):
+        self.rect.top = 980
         group.remove(self)
+        self.kill()
 
     def update(self):
         self.move()
