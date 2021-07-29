@@ -1,30 +1,41 @@
 import pygame
 import random
+import object
 import settings
 import background
 
 
 class Stage:
-    def __init__(self, player, boss, name, bgTexture, score, enemyDic):
-        # setting up the sprite groups and textures
+    def __init__(self, playerTextures, boss, name, bgTexture, score, enemyList):
+        # setting up the sprite groups
         self.objectGroup = pygame.sprite.Group()
-        self.enemyGroup = pygame.sprite.Group()
-        self.bulletGroup = pygame.sprite.Group()
-        self.bgTexture = bgTexture
-        self.player = player
-        self.boss = boss
-        self.name = name
-        self.score = score
-        self.enemyDic = enemyDic
+        self.enemyList = enemyList
+        self.bulletList = []
 
-        # set up backgrounds
-        self.bg1 = background.Background(bgTexture, (650, 650), 0)
+        # some textures
+        self.bgTexture = bgTexture
+        self.playerTextures = playerTextures
+        self.boss = boss
+
+        self.name = name    # name of the stage
+        self.score = score  # score
+
+        # set up the sprites
+        self.bg1 = background.Background(bgTexture, (650, 650), 0)  # backgrounds that loop on the stage
         self.bg2 = background.Background(bgTexture, (650, 650), 1)
         self.bg3 = background.Background(bgTexture, (650, 650), 2)
+        self.player = object.Player(3, self.playerTextures[0], (325, 900), self.playerTextures[1], 0, 0)    # the player
+
+        # add the required sprites of a stage to the object group
         self.objectGroup.add(self.bg1, self.bg2, self.bg3, self.player)
 
     def collisions(self):
-        pass
+        for enemy in self.enemyList:
+            if pygame.sprite.spritecollideany(enemy, self.player.bulletGroup) is not None:
+                enemy.currentHealth -= 1
+                enemy.collision(self.player.bulletGroup, True)
+            if enemy.currentHealth <= 0 and enemy.rect.top == 1000:
+                self.score += enemy.score
 
     def spawnBoss(self):
         pass
@@ -37,8 +48,8 @@ class Stage:
 
     def update(self, window):
         self.objectGroup.add(self.player.objectGroup)
-        for i in range(len(self.enemyDic)):
-            self.objectGroup.add(self.enemyDic[i])
+        for enemy in self.enemyList:
+            self.objectGroup.add(enemy)
         self.collisions()
         self.objectGroup.update()
         self.objectGroup.draw(window)
@@ -47,6 +58,6 @@ class Stage:
         scoreFont = settings.kenFont.render('Score: ' + str(self.score), True, (255, 255, 255))
         healthFont = settings.kenFont.render('health: ' + str(self.player.health), True, (255, 255, 255))
         stageFont = settings.kenFont.render(self.name, True, (255, 255, 255))
-        window.blit(stageFont, (10, 40))    # draw text
+        window.blit(stageFont, (10, 40))  # draw text
         window.blit(scoreFont, (10, 5))
         window.blit(healthFont, (480, 5))

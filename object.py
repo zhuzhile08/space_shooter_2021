@@ -17,8 +17,9 @@ class HealthBar(pygame.sprite.Sprite):
 
 
 class Movables(pygame.sprite.Sprite):
-    def __init__(self, health, texture, startingPos, bulletTexture, scale):
+    def __init__(self, health, texture, startingPos, bulletTexture, scale, score):
         pygame.sprite.Sprite.__init__(self)
+        self.score = score
         self.scale = scale
         self.startingPos = startingPos
 
@@ -51,11 +52,11 @@ class Movables(pygame.sprite.Sprite):
     def move(self):
         pass
 
-    def collision(self, rect):
-        return self.rect.colliderect(rect)
+    def collision(self, group, dokill):
+        pygame.sprite.spritecollide(self, group, dokill)
 
-    def cooldown(self):
-        if self.cooldownTimer >= 10:
+    def cooldown(self, waitTime):
+        if self.cooldownTimer >= waitTime:
             self.cooldownTimer = 0
         elif self.cooldownTimer > 0:
             self.cooldownTimer += 1
@@ -65,16 +66,19 @@ class Movables(pygame.sprite.Sprite):
         self.bulletGroup.add(bullet)
         self.objectGroup.add(bullet)
 
+    def removeFromGroup(self, group):
+        group.remove(self)
+
     def update(self):
         self.move()
-        if self.currentHealth <= 1:
-            self.kill()
+        if self.currentHealth <= 0:
+            self.rect.top.y = 980
 
 
 class Player(Movables):
     # move
     def move(self):
-        self.cooldown()
+        self.cooldown(10)
         # reset speed
         self.speedX = 0
         self.speedY = 0
@@ -118,9 +122,12 @@ class Meteor(Movables):
         self.rect.y += self.startingPos[3]
 
     def update(self):
-        if self.rect.top >= 980:
-            self.kill()
         if self.rect.bottom <= 0:
             self.rect.y += 3
+        if self.rect.top >= 980:
+            self.kill()
         elif self.rect.bottom >= 1:
             self.move()
+
+        if self.currentHealth <= 0:
+            self.rect.top = 1000
