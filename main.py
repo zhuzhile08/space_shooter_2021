@@ -5,7 +5,6 @@ import os
 import settings
 import random
 import object as obj
-import background as bj
 import stage
 from pygame.locals import*
 
@@ -20,13 +19,12 @@ window = pygame.display.set_mode((650, 980))
 score = 0
 
 # textures and objects
-playerBulletTexture = os.path.join(settings.laserFolder, 'laserBlue16.png')
+playerBulletTextures = [os.path.join(settings.laserFolder, 'laserBlue16.png'), os.path.join(settings.effectsFolder, 'fire16.png')]
+playerTexture = os.path.join(settings.imgFolder, 'playerShip1_blue.png')
 bgTexture = os.path.join(settings.bgFolder, 'black.png')
-player = obj.Player(3, os.path.join(settings.imgFolder, 'playerShip1_blue.png'), (325, 900), playerBulletTexture, 0)
-
 
 # enemy dictionaries for each stage
-stg1EnemyDic = [settings.generateEnemyDictionaryStage1()]
+stg1EnemyDic = settings.generateEnemyDictionaryStage1()
 
 stg2EnemyDic = []
 stg3EnemyDic = []
@@ -34,13 +32,12 @@ stg4EnemyDic = []
 stg5EnemyDic = []
 
 # crate stages
-stage1 = stage.Stage(player, 0, 'Stage 1', bgTexture, score, stg1EnemyDic)
+stage1 = stage.Stage([playerTexture, playerBulletTextures], 0, 'Stage 1', bgTexture, score, stg1EnemyDic)
 
 # main game loop
 running = True
 
 while running:
-
     # events
     for event in pygame.event.get():
         if event.type == QUIT:

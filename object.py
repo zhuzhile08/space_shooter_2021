@@ -17,7 +17,7 @@ class HealthBar(pygame.sprite.Sprite):
 
 
 class Movables(pygame.sprite.Sprite):
-    def __init__(self, health, texture, startingPos, bulletTexture, scale, score):
+    def __init__(self, health, texture, startingPos, bulletTextures, scale, score):
         pygame.sprite.Sprite.__init__(self)
         self.score = score
         self.scale = scale
@@ -46,8 +46,7 @@ class Movables(pygame.sprite.Sprite):
         # setup bullet
         self.bulletGroup = pygame.sprite.Group()
         self.objectGroup = pygame.sprite.Group()
-        self.bulletTexture = bulletTexture
-        # self.bullet = bullet, bullet
+        self.bulletTextures = bulletTextures
 
     def move(self):
         pass
@@ -62,12 +61,12 @@ class Movables(pygame.sprite.Sprite):
             self.cooldownTimer += 1
 
     def shoot(self):
-        bullet = bullets.Bullet(self.bulletTexture, (self.rect.centerx, self.rect.top - 45), 40)
+        bullet = bullets.Bullet(self.bulletTextures[0], (self.rect.centerx, self.rect.top - 45), 40, self.bulletTextures[1])
         self.bulletGroup.add(bullet)
         self.objectGroup.add(bullet)
 
     def removeFromGroup(self, group):
-        self.rect.top = 980
+        self.rect.top = 1000
         group.remove(self)
         self.kill()
 
@@ -116,6 +115,9 @@ class Player(Movables):
     def update(self):
         self.screenWrap()
         self.move()
+
+        if self.currentHealth <= 0:
+            self.rect.top = 1500
 
 
 class Meteor(Movables):

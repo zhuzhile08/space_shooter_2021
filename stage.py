@@ -14,7 +14,6 @@ class Stage:
 
         # some textures
         self.bgTexture = bgTexture
-        self.playerTextures = playerTextures
         self.boss = boss
 
         self.name = name    # name of the stage
@@ -24,7 +23,7 @@ class Stage:
         self.bg1 = background.Background(bgTexture, (650, 650), 0)  # backgrounds that loop on the stage
         self.bg2 = background.Background(bgTexture, (650, 650), 1)
         self.bg3 = background.Background(bgTexture, (650, 650), 2)
-        self.player = object.Player(3, self.playerTextures[0], (325, 900), self.playerTextures[1], 0, 0)    # the player
+        self.player = object.Player(3, playerTextures[0], (325, 900), playerTextures[1], 0, 0)    # the player
 
         # add the required sprites of a stage to the object group
         self.objectGroup.add(self.bg1, self.bg2, self.bg3, self.player)
@@ -37,6 +36,10 @@ class Stage:
                 if enemy.currentHealth <= 0:
                     self.score += enemy.score
                     enemy.removeFromGroup(self.objectGroup)
+
+            if pygame.sprite.collide_mask(enemy, self.player) is not None:
+                enemy.removeFromGroup(self.objectGroup)
+                self.player.currentHealth -= 1
 
     def spawnBoss(self):
         pass
@@ -57,7 +60,7 @@ class Stage:
 
         # initialize and draw text on screen (score, player health, stage name)
         scoreFont = settings.kenFont.render('Score: ' + str(self.score), True, (255, 255, 255))
-        healthFont = settings.kenFont.render('health: ' + str(self.player.health), True, (255, 255, 255))
+        healthFont = settings.kenFont.render('health: ' + str(self.player.currentHealth), True, (255, 255, 255))
         stageFont = settings.kenFont.render(self.name, True, (255, 255, 255))
         window.blit(stageFont, (10, 40))  # draw text
         window.blit(scoreFont, (10, 5))
